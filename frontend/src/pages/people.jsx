@@ -1,24 +1,30 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import "../assets/peoples.css";
 import backgroundImg from "../background/background.png";
 import { Link } from "react-router-dom";
-import user from "../icons/user.png";
-import send from "../icons/send.png";
-import gear from "../icons/gear.png";
-import logout from "../icons/log-out.png";
+import userIcon from "../icons/user.png";
+import sendIcon from "../icons/send.png";
+import gearIcon from "../icons/gear.png";
+import logoutIcon from "../icons/log-out.png";
+import bell from "../icons/bell.png";
+import socket from "../components/socket";
+import happy from "../icons/happy.png";
+import EmojiPickerComponent from "../components/EmojiPickerComponent";
 
-const ChatItem = ({ username, time, isActive }) => (
-    <div className={`chat-item ${isActive ? 'active' : ''}`}>
-        <img src={user} className="user-icon"/>
+const ChatItem = ({ id, username, isActive, onClick, hasNotification }) => (
+    <div className={`chat-item ${isActive ? 'active' : ''}`} onClick={() => onClick(id)}>
+        <img src={userIcon} className="user-icon" />
         <span className="username">{username}</span>
-        <span className="time">{time}</span>
+        <img
+            src={bell}
+            className={`bell-icon ${hasNotification ? 'bell-animate' : ''}`}
+        />
     </div>
 );
 
-
 const MessageBubble = ({ text, time, type }) => (
     <div className={`message-row ${type}`}>
-        {type === 'received' && <img src={user} className="user-icon"/>}
+        {type === 'received' && <img src={userIcon} className="user-icon" />}
         <div className="message-bubble">
             {text}
             <div className="message-time">{time}</div>
@@ -27,64 +33,132 @@ const MessageBubble = ({ text, time, type }) => (
 );
 
 export default function Peoples() {
+    const [users, setUsers] = useState([]);
+    const [messages, setMessages] = useState([]);
+    const [currentMessage, setCurrentMessage] = useState("");
+    const [activeChatId, setActiveChatId] = useState(null);
+    const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+    const [notifications, setNotifications] = useState({});
 
-    const chatList = [
-        { id: 1, username: "nome do usuario", time: "00:00", active: true },
-        { id: 2, username: "nome do usuario", time: "00:00", active: false },
-        { id: 3, username: "nome do usuario", time: "00:00", active: false },
-        { id: 4, username: "nome do usuario", time: "00:00", active: false },
-    ];
+    const currentUser = JSON.parse(localStorage.getItem("user"));
 
-    const messages = [
-        { id: 1, text: "assunto da conversa", time: "00:00", type: "received" },
-        { id: 2, text: "assunto da conversa", time: "00:00", type: "sent" },
-    ];
+    const handleEmojiClick = (emoji) => {
+        setCurrentMessage(prev => prev + emoji);
+    };
+
+    useEffect(() => {
+        if (!currentUser) return;
+        fetch(`http://localhost:3000/users/${currentUser.id}`)
+            .then(res => res.json())
+            .then(data => setUsers(data));
+    }, []);
+
+    useEffect(() => {
+        if (!currentUser) return;
+        socket.emit("join", currentUser.id);
+
+        socket.on("new_message", (msg) => {
+            if (msg.senderId === activeChatId || msg.receiverId === activeChatId) {
+                setMessages(prev => [...prev, { ...msg, type: msg.senderId === currentUser.id ? "sent" : "received" }]);
+            } else {
+                setNotifications(prev => ({ ...prev, [msg.senderId]: true }));
+            }
+        });
+
+
+        return () => socket.off("new_message");
+    }, [activeChatId, currentUser]);
+
+    const loadMessages = async (userId) => {
+        setActiveChatId(userId);
+        setNotifications(prev => ({ ...prev, [userId]: false }));
+
+        const res = await fetch(`http://localhost:3000/messages/${currentUser.id}/${userId}`);
+        const msgs = await res.json();
+        setMessages(msgs.map(m => ({
+            ...m,
+            type: m.senderId === currentUser.id ? "sent" : "received"
+        })));
+    };
+
+    const sendMessage = async () => {
+        if (!currentMessage || !activeChatId) return;
+
+        const msgData = {
+            senderId: currentUser.id,
+            receiverId: activeChatId,
+            content: currentMessage,
+        };
+
+        await fetch("http://localhost:3000/message", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(msgData),
+        });
+
+        setMessages(prev => [
+            ...prev,
+            { ...msgData, type: "sent", id: Date.now(), createdAt: new Date() },
+        ]);
+
+        setCurrentMessage("");
+    };
 
     return (
         <div className="peoples-container">
             <div className="sidebar-left">
-                <Link to="/profile" className="nav-icon"><img src={user} className="user-icon"/></Link>
-                <Link to="/settings" className="nav-icon"><img src={gear} className="user-icon"/></Link>
-                <Link to="/" className="nav-icon"><img src={logout} className="user-icon"/></Link>
+                <Link to="/profile" className="nav-icon"><img src={userIcon} className="user-icon" /></Link>
+                <Link to="/settings" className="nav-icon"><img src={gearIcon} className="user-icon" /></Link>
+                <Link to="/login" className="nav-icon"><img src={logoutIcon} className="user-icon" /></Link>
             </div>
 
             <div className="main-content" style={{ backgroundImage: `url(${backgroundImg})` }}>
-                
                 <div className="chat-header">
                     <div className="chat-header-info">
-                        <img src={user} className="user-icon"/>
-                        <span className="username">nome do usuario</span>
+                        <img src={userIcon} className="user-icon" />
+                        <span className="username">{users.find(u => u.id === activeChatId)?.name || "Selecione um usuário"}</span>
                     </div>
                 </div>
 
                 <div className="chat-messages">
                     {messages.map(msg => (
-                        <MessageBubble 
-                            key={msg.id} 
-                            text={msg.text} 
-                            time={msg.time} 
-                            type={msg.type} 
+                        <MessageBubble
+                            key={msg.id}
+                            text={msg.content || msg.text}
+                            time={new Date(msg.createdAt).toLocaleTimeString().slice(0, 5)}
+                            type={msg.type}
                         />
                     ))}
                 </div>
 
                 <div className="message-input-area">
-                    <input type="text" placeholder="Digite sua mensagem..." />
-                    <img src={send} className="send-icon"/>
+                    <button className="emoji-button" onClick={() => setShowEmojiPicker(prev => !prev)}>
+                        <img src={happy} className="emoji-icon" />
+                    </button>
+                    <input
+                        type="text"
+                        placeholder="Digite sua mensagem..."
+                        value={currentMessage}
+                        onChange={(e) => setCurrentMessage(e.target.value)}
+                        onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+                    />
+                    <img src={sendIcon} className="send-icon" onClick={sendMessage} />
                 </div>
+
+                {showEmojiPicker && <EmojiPickerComponent onSelectEmoji={handleEmojiClick} />}
             </div>
 
             <div className="sidebar-right">
-                <div className="sidebar-right-header">
-                    Bubbies
-                </div>
+                <div className="sidebar-right-header">Bubbies</div>
                 <div className="chat-list">
-                    {chatList.map(chat => (
-                        <ChatItem 
-                            key={chat.id} 
-                            username={chat.username} 
-                            time={chat.time} 
-                            isActive={chat.active} 
+                    {users.map(user => (
+                        <ChatItem
+                            key={user.id}
+                            id={user.id}
+                            username={user.name}
+                            isActive={user.id === activeChatId}
+                            onClick={loadMessages}
+                            hasNotification={notifications[user.id]}
                         />
                     ))}
                 </div>

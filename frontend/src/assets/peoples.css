@@ -187,7 +187,7 @@
     height: 60px;
     display: flex;
     align-items: center;
-    justify-content: flex-start;
+    justify-content: center;
     font-size: 1.2em;
     font-weight: bold;
     color: #FF8E71;
@@ -207,6 +207,19 @@
     transition: background-color 0.2s;
     border-radius: 10px;
     border-bottom: 10px solid rgba(0, 0, 0, 0);
+    position: relative;
+}
+.chat-item .bell-icon {
+    width: 20px;
+    height: 20px;
+    margin-left: auto;
+    opacity: 0.7;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.chat-item .bell-icon:hover {
+    opacity: 1;
 }
 
 .chat-item:hover {
@@ -237,3 +250,41 @@
     width: 25px;
     height: 25px;
 }
+
+.emoji-picker-container {
+  position: absolute;
+  bottom: 60px;
+  z-index: 10;
+}
+.emoji-button {
+  background-color: #6DA0E1;
+  border: 1px solid #ccc;
+  border-radius: 60px;
+  padding: 5px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+}
+
+.emoji-button img {
+  width: 29px;
+  height: 29px;
+}
+
+@keyframes bellFlash {
+  0% { transform: rotate(0deg); filter: hue-rotate(0deg); }
+  15% { transform: rotate(-15deg); filter: hue-rotate(30deg); }
+  30% { transform: rotate(10deg); filter: hue-rotate(60deg); }
+  45% { transform: rotate(-10deg); filter: hue-rotate(90deg); }
+  60% { transform: rotate(6deg); filter: hue-rotate(120deg); }
+  75% { transform: rotate(-4deg); filter: hue-rotate(150deg); }
+  100% { transform: rotate(0deg); filter: hue-rotate(0deg); }
+}
+
+.bell-animate {
+  animation: bellFlash 1s ease-in-out infinite;
+}
+
