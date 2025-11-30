@@ -1,0 +1,239 @@
+:root {
+    --blue-bg: #85aee8;
+    --main-bg-color: #f5f5dc;
+    --sidebar-left-width: 60px;
+    --sidebar-right-width: 280px;
+    --chat-bubble-color: #85aee8;
+    --chat-bubble-received-color: #85aee8;
+    --input-bg-color: white;
+}
+
+.peoples-container {
+    display: flex;
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+}
+
+.sidebar-left {
+    width: var(--sidebar-left-width);
+    background-color: var(--blue-bg);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding-bottom: 20px;
+}
+
+.nav-icon {
+    color: white;
+    font-size: 24px;
+    padding: 15px 0;
+    text-align: center;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+
+.nav-icon:hover {
+    opacity: 1;
+}
+
+.main-content {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--main-bg-color);
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+}
+
+
+.chat-header {
+    height: 55px;
+    background-color: var(--blue-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-bottom-right-radius: 20px;
+    border-bottom-left-radius: 20px;
+    padding: 0 20px;
+    color: white;
+    font-weight: bold;
+    width: 25%;
+    margin: 0 auto 10px;
+}
+
+
+.chat-header-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.chat-header-info .user-icon {
+    width: 25px;
+    height: 25px;
+}
+
+.chat-header-info .username {
+    font-size: 1rem;
+}
+
+
+.chat-messages {
+    flex-grow: 1;
+    padding: 20px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.message-row {
+    display: flex;
+    margin-bottom: 15px;
+}
+
+.message-row.sent {
+    justify-content: flex-end;
+}
+
+.message-row.received {
+    justify-content: flex-start;
+}
+
+.message-bubble {
+    max-width: 60%;
+    padding: 10px 15px;
+    border-radius: 15px;
+    color: white;
+    position: relative;
+    font-size: 0.9em;
+}
+
+.message-row.sent .message-bubble {
+    background-color: var(--chat-bubble-color);
+    border-bottom-right-radius: 5px;
+}
+
+.message-row.received .message-bubble {
+    background-color: var(--chat-bubble-received-color);
+    border-bottom-left-radius: 5px;
+    margin-left: 10px;
+}
+
+.message-row.received .user-icon {
+    font-size: 24px;
+    color: var(--blue-bg);
+}
+
+.message-time {
+    font-size: 0.7em;
+    color: rgba(255, 255, 255, 0.8);
+    margin-top: 5px;
+    text-align: right;
+}
+
+.message-input-area {
+    height: 70px;
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+}
+
+.message-input-area input {
+    flex-grow: 1;
+    padding: 10px 45px 10px 15px;
+    border: none;
+    border-radius: 20px;
+    background-color: #f0f0f0;
+    outline: none;
+    color: #6DA0E1;
+    font-size: 16px;
+}
+.message-input-area .send-icon {
+    position: absolute;
+    right: 35px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    opacity: 0.8;
+    transition: 0.2s;
+}
+.message-input-area .send-icon:hover {
+    opacity: 1;
+    scale: 1.05;
+}
+
+.message-input-area {
+    position: relative;
+    height: 70px;
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+}
+
+.sidebar-right {
+    width: var(--sidebar-right-width);
+    background-color: var(--blue-bg);
+    display: flex;
+    flex-direction: column;
+    color: white;
+}
+
+.sidebar-right-header {
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #FF8E71;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.chat-list {
+    flex-grow: 1;
+    overflow-y: auto;
+}
+
+.chat-item {
+    display: flex;
+    align-items: center;
+    padding: 15px 20px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    border-radius: 10px;
+    border-bottom: 10px solid rgba(0, 0, 0, 0);
+}
+
+.chat-item:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.chat-item.active {
+    background-color: rgba(255, 255, 255, 0.2);
+    
+}
+
+.chat-item .user-icon {
+    font-size: 24px;
+    margin-right: 10px;
+}
+
+.chat-item .username {
+    flex-grow: 1;
+    font-weight: 500;
+}
+
+.chat-item .time {
+    font-size: 0.7em;
+    opacity: 0.8;
+}
+
+.user-icon {
+    width: 25px;
+    height: 25px;
+}
