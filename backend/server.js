@@ -27,8 +27,15 @@ app.post("/register", async (req, res) => {
   try {
     const { username, email, password } = req.body;
 
+    const missingFields = [username, email, password].some(field => !field);
+    if (missingFields) {
+      return res.status(400).json({ message: "dados obrigatorios faltando" });
+    }
+
     const exists = await prisma.user.findUnique({ where: { email } });
-    if (exists) return res.status(400).json({ message: "email indisponivel." });
+    if (exists) {
+      return res.status(400).json({ message: "email indisponivel" });
+    }
 
     const hash = await bcrypt.hash(password, 10);
 
@@ -36,9 +43,10 @@ app.post("/register", async (req, res) => {
       data: { name: username, email, password: hash },
     });
 
-    res.json({ message: "usuario registrado!", user });
+    return res.json({ message: "usuario registrado", user });
+
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    return res.status(500).json({ error: error.message });
   }
 });
 
